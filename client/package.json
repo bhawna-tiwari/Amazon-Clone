@@ -51,6 +51,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8006"
-
+"proxy": "https://amazon-clone-project-u1p8.onrender.com"
 }
