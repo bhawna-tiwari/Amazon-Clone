@@ -10,9 +10,10 @@ router.get("/getproducts", async (req, res) => {
   try {
     const producstdata = await products.find();
     // console.log(producstdata + "data mila hain");
-    res.status(201).json(producstdata);
+    res.status(200).json(producstdata);
   } catch (error) {
-    console.log("error" + erroir.message);
+    console.log("error " + error.message);  
+  res.status(500).json({ message: "Internal server error" });
   }
 });
 

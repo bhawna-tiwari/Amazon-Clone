@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
-const DB = process.env.DATABASE;
-
-mongoose.connect(DB).then(()=>console.log("connection is successfully done")).catch((error)=>console.log("error hai" + error.message))
+mongoose.connect(process.env.DATABASE, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ MongoDB connection successful"))
+.catch((err) => console.log("❌ MongoDB connection error:", err.message));

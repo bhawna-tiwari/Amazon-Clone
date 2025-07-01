@@ -18,8 +18,7 @@ app.use(cors({
   }));
 app.use(router);
 
-const port=8006;
-
+const PORT = process.env.PORT || 8006;
 app.listen(port,()=>{
     console.log(`server is running on port number ${port}`);
 });
