@@ -40,30 +40,37 @@ const Cart = () => {
     setTimeout(getinddata, 1000);
   }, [id]);
 
-  const addtocart = async (id) => {
-    try {
-      const checkres = await fetch(`${BACKEND_URL}/addcart/${id}`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inddata }),
-        credentials: "include",
-      });
+ const addtocart = async (id) => {
+  try {
+    const checkres = await fetch(`${BACKEND_URL}/addcart/${id}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
 
-      const data1 = await checkres.json();
-
-      if (checkres.status === 401 || !data1) {
-        alert("Please login to add items to cart.");
-      } else {
-        setAccount(data1);
-        navigate("/buynow");
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
+    if (checkres.status === 401) {
+      const text = await checkres.text();
+      alert("Please login to add items to cart.");
+      console.warn("Unauthorized:", text);
+      return;
     }
-  };
+
+    const data1 = await checkres.json();
+
+    if (!data1) {
+      alert("Something went wrong while adding to cart.");
+    } else {
+      setAccount(data1);
+      navigate("/buynow");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+  }
+};
+
 
   return (
     <div className="cart_section">
