@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser(""));
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://amazon-clone-one-gamma.vercel.app/" 
+  "https://amazon-clone-one-gamma.vercel.app" 
 ];
 
 app.use(cors({
