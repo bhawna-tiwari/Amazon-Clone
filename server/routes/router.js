@@ -3,77 +3,58 @@ const router = new express.Router();
 const products = require("../models/productsSchema");
 const USER = require("../models/userSchema");
 const bcrypt = require("bcrypt");
-const authenicate = require("../middleware/authenticate");
+const authenticate = require("../middleware/authenticate");
 
-//get productsdata api
+// GET all products
 router.get("/getproducts", async (req, res) => {
   try {
-    const producstdata = await products.find();
-    // console.log(producstdata + "data mila hain");
-    res.status(200).json(producstdata);
+    const productsData = await products.find();
+    res.status(200).json(productsData);
   } catch (error) {
-    console.log("error " + error.message);  
-  res.status(500).json({ message: "Internal server error" });
+    console.error("Error fetching products:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
+// GET single product by ID
 router.get("/getproductsone/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    //console.log(id);
-
-    const individual = await products.findOne({ id: id });
-    //console.log(individual + "individual data mila hai");
-
-    res.status(201).json(individual);
+    const individualProduct = await products.findOne({ id });
+    res.status(200).json(individualProduct);
   } catch (error) {
-    res.status(400).json(individual);
-    console.log("error" + erroir.message);
+    console.error("Error fetching single product:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// register the data
+// REGISTER user
 router.post("/register", async (req, res) => {
-  // console.log(req.body);
   const { fname, email, mobile, password, cpassword } = req.body;
 
   if (!fname || !email || !mobile || !password || !cpassword) {
-    res.status(422).json({ error: "filll the all details" });
-    console.log("not data available");
+    return res.status(422).json({ error: "Please fill all details" });
   }
 
   try {
-    const preuser = await USER.findOne({ email: email });
+    const preuser = await USER.findOne({ email });
 
     if (preuser) {
-      res.status(422).json({ error: "This email is already exist" });
+      return res.status(422).json({ error: "Email already exists" });
     } else if (password !== cpassword) {
-      res.status(422).json({ error: "password are not matching" });
+      return res.status(422).json({ error: "Passwords do not match" });
     } else {
-      const finaluser = new USER({
-        fname,
-        email,
-        mobile,
-        password,
-        cpassword,
-      });
-
-      // yaha pe hasing krenge
-
+      const finaluser = new USER({ fname, email, mobile, password, cpassword });
       const storedata = await finaluser.save();
-      console.log(storedata + "user successfully added");
       res.status(201).json(storedata);
     }
   } catch (error) {
-    console.log(
-      "error the bhai catch ma for registratoin time" + error.message
-    );
-    res.status(422).send(error);
+    console.error("Registration error:", error.message);
+    res.status(500).send(error);
   }
 });
 
-//login user api
-
+// LOGIN user
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -82,117 +63,91 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    const userlogin = await USER.findOne({ email: email });
+    const userLogin = await USER.findOne({ email });
 
-    if (userlogin) {
-      // Compare plain text password
-      if (password === userlogin.password) {
-        console.log("✅ Password matched successfully for:", email);
-        // Token generate (if you're using JWT or similar)
-        const token = await userlogin.generatAuthtoken();
-
-        res.cookie("AmazonWeb", token, {
-          expires: new Date(Date.now() + 900000),
-          httpOnly: true,
-          sameSite: "Lax",     // or "None" if cross-origin
-          secure: false        // false for localhost, true for HTTPS
-        });
-
-        return res.status(201).json({ userlogin});
-      } else {
-        return res.status(400).json({ error: "Invalid password" });
-      }
+    if (userLogin && password === userLogin.password) {
+      const token = await userLogin.generatAuthtoken();
+      res.cookie("AmazonWeb", token, {
+        expires: new Date(Date.now() + 900000),
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: false,
+      });
+      return res.status(201).json({ userLogin });
     } else {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: "Invalid credentials" });
     }
   } catch (error) {
+    console.error("Login error:", error.message);
     return res.status(500).json({ error: "Server error" });
   }
 });
 
-
-//adding the data into cart
-
-router.post("/addcart/:id", authenicate, async (req, res) => {
+// ADD to cart
+router.post("/addcart/:id", authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const cart = await products.findOne({ id: id });
-    console.log(cart + "cart value");
+    const cartProduct = await products.findOne({ id });
+    const userContact = await USER.findById(req.userID);
 
-    const Usercontact = await USER.findOne({ _id:req.userID });
-    console.log(Usercontact + "user milta hain");
-
-    if (Usercontact) {
-      const cartData = await Usercontact.addcartdata(cart);
-      await Usercontact.save();
-      console.log(cartData + " thoda sa wait kr");
-      //console.log(Usercontact + "userjode save");
-      res.status(201).json(Usercontact);
+    if (userContact) {
+      userContact.carts.push(cartProduct);
+      await userContact.save();
+      res.status(201).json(userContact);
     } else {
-      res.status(401).json({ error: "invalid user" });
+      res.status(401).json({ error: "Invalid user" });
     }
-
-
   } catch (error) {
-    res.status(401).json({ error: "invalid user" });
+    console.error("Add to cart error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-//get cart details
-router.get("/cartdetails", authenicate, async (req, res) => {
+// GET cart details
+router.get("/cartdetails", authenticate, async (req, res) => {
   try {
-      const buyuser = await USER.findOne({ _id: req.userID });
-      // console.log(buyuser + "user available");
-      res.status(201).json(buyuser);
+    const user = await USER.findById(req.userID);
+    res.status(200).json(user);
   } catch (error) {
-      console.log(error + "error");
+    console.error("Cart details error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// get user is login or not
-router.get("/validateuser", authenicate, async (req, res) => {
+// VALIDATE user
+router.get("/validateuser", authenticate, async (req, res) => {
   try {
-      const validateuser= await USER.findOne({ _id: req.userID });
-      res.status(201).json(validateuser);
+    const user = await USER.findById(req.userID);
+    res.status(200).json(user);
   } catch (error) {
-      console.log(error + "error for valid user");
+    console.error("Validate user error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-router.delete("/remove/:id", authenicate, async (req, res) => {
+// REMOVE item from cart
+router.delete("/remove/:id", authenticate, async (req, res) => {
   try {
-      const { id } = req.params;
-
-      req.rootUser.carts = req.rootUser.carts.filter((cruval) => {
-          return cruval.id != id;
-      });
-
-      req.rootUser.save();
-      res.status(201).json(req.rootUser);
-      console.log("iteam remove");
-
+    const { id } = req.params;
+    req.rootUser.carts = req.rootUser.carts.filter(item => item.id !== id);
+    await req.rootUser.save();
+    res.status(200).json(req.rootUser);
   } catch (error) {
-      console.log("error" + error);
-      res.status(400).json(req.rootUser);
+    console.error("Remove item error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-//for user logout
-router.get("/logout", authenicate, async (req, res) => {
+// LOGOUT user
+router.get("/logout", authenticate, async (req, res) => {
   try {
-      req.rootUser.tokens = req.rootUser.tokens.filter((curelem) => {
-          return curelem.token !== req.token
-      });
-
-      res.clearCookie("Amazonweb", { path: "/" });
-      req.rootUser.save();
-      res.status(201).json(req.rootUser.tokens);
-      console.log("user logout");
-
+    req.rootUser.tokens = req.rootUser.tokens.filter(tokenObj => tokenObj.token !== req.token);
+    res.clearCookie("AmazonWeb", { path: "/" });
+    await req.rootUser.save();
+    res.status(200).json({ message: "User logged out" });
   } catch (error) {
-      console.log(error + "jwt provide then logout");
+    console.error("Logout error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
