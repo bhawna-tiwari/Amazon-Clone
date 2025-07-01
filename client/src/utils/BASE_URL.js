@@ -1,3 +1,2 @@
-const BASE_URL = "http://localhost:8006";
-
+const BASE_URL = "https://amazon-clone-project-u1p8.onrender.com";
 export default BASE_URL;
