@@ -34,6 +34,11 @@ app.use(cors({
 app.use(router);
 
 const PORT = process.env.PORT || 8006;
+
+app.get("/", (req, res) => {
+  res.send("API is working!");
+});
+
 app.listen(PORT,()=>{
     console.log(`server is running on port number ${PORT}`);
 });
