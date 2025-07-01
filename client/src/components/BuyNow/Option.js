@@ -1,55 +1,55 @@
-import React, { useContext } from 'react'
+import React, { useContext } from 'react';
 import { Logincontext } from '../context/Contextprovider';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Option = ({ deletedata, get }) => {
-    // console.log(deletedata);
+  const { account, setAccount } = useContext(Logincontext);
 
-    const { account, setAccount } = useContext(Logincontext);
-    // console.log(account);
+  const removedata = async () => {
+    try {
+      const res = await fetch(`https://amazon-clone-project-u1p8.onrender.com/remove/${deletedata}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      });
 
-    const removedata = async (req,res) => {
-        try {
-            const res = await fetch(`/remove/${deletedata}`, {
-                method: "DELETE",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json"
-                },
-                credentials: "include"
-            });
+      const data = await res.json();
 
-            const data = await res.json();
-            // console.log(data);
-
-            if (res.status === 400 || !data) {
-                console.log("error ");
-            } else {
-                console.log("user deleted");
-                setAccount(data);
-                toast.success("Iteam remove from cart 😃!", {
-                    position: "top-center"
-                });
-                get();
-            }
-        } catch (error) {
-            console.log("error");
-        }
+      if (res.status === 400 || !data) {
+        console.log("error");
+      } else {
+        console.log("user deleted");
+        setAccount(data);
+        toast.success("Item removed from cart 😃!", {
+          position: "top-center"
+        });
+        get();
+      }
+    } catch (error) {
+      console.log("error");
     }
+  };
 
-    return <div className='add_remove_select'>
-            <select>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-            </select>
-            <p style={{ cursor: "pointer" }} onClick={() => removedata(deletedata)}>Delete</p><span>|</span>
-            <p className="forremovemedia">Save Or Later</p><span>|</span>
-            <p className="forremovemedia">See More like this</p>
-        </div>;
-            <ToastContainer />
+  return (
+    <>
+      <div className='add_remove_select'>
+        <select>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+        <p style={{ cursor: "pointer" }} onClick={removedata}>Delete</p><span>|</span>
+        <p className="forremovemedia">Save Or Later</p><span>|</span>
+        <p className="forremovemedia">See More like this</p>
+      </div>
+      <ToastContainer />
+    </>
+  );
 };
 
 export default Option;

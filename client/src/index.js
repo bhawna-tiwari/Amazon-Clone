@@ -1,14 +1,17 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import { Provider } from "react-redux";
 import store from "./store";
 import Contextprovider from "./components/context/Contextprovider";
 import { BrowserRouter } from "react-router-dom";
-import "../src/index.css";
+import './index.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+root.render(
   <Contextprovider>
     <Provider store={store}>
       <BrowserRouter>
@@ -16,6 +19,4 @@ ReactDOM.render(
       </BrowserRouter>
     </Provider>
   </Contextprovider>
-  ,
-  document.getElementById('root')
 );

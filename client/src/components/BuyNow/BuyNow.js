@@ -4,13 +4,14 @@ import Option from "./Option";
 import Right from "./Right";
 import Subtotal from "./Subtotal";
 import "./buynow.css";
+import BASE_URL from "../../utils/BASE_URL"
 
 const Buynow = () => {
-  const [cartdata, setCartdata] = useState("");
+  const [cartdata, setCartdata] = useState([]);
   //console.log(cartdata);
 
   const getdatabuy = async () => {
-    const res = await fetch("/cartdetails", {
+    const res = await fetch(`${BASE_URL}/cartdetails`, {
       method: "GET",
       headers: {
         Accept: "application/json",

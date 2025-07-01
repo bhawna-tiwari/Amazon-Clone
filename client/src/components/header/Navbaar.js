@@ -15,6 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Rightheader from "./Rightheader";
 import { getProducts } from "../redux/actions/action";
 import { useSelector, useDispatch } from "react-redux";
+import  BASE_URL  from '../../utils/BASE_URL' // ✅ import base URL
 
 const useStyles = makeStyles({
   component: {
@@ -29,17 +30,20 @@ const useStyles = makeStyles({
 const Navbaar = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const [text, setText] = useState();
+  const [text, setText] = useState("");
   const { products } = useSelector((state) => state.getproductsdata);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getProducts());
-  }, [dispatch]);
 
   const [open, setOpen] = useState(false);
   const [liopen, setLiopen] = useState(true);
   const [dropen, setDropen] = useState(false);
+
+  const { account, setAccount } = useContext(Logincontext);
+
+  useEffect(() => {
+    dispatch(getProducts());
+    getdetailsvaliduser();
+  }, [dispatch]);
 
   const handleClick = (event) => {
     setOpen(event.currentTarget);
@@ -49,10 +53,8 @@ const Navbaar = () => {
     setOpen(false);
   };
 
-  const { account, setAccount } = useContext(Logincontext);
-
   const getdetailsvaliduser = async () => {
-    const res = await fetch("/validuser", {
+    const res = await fetch(`${BASE_URL}/validuser`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -62,19 +64,15 @@ const Navbaar = () => {
     });
 
     const data = await res.json();
-    if (res.status !== 201) {
-      console.log("First login");
-    } else {
+    if (res.status === 201) {
       setAccount(data);
+    } else {
+      console.log("Not logged in");
     }
   };
 
-  useEffect(() => {
-    getdetailsvaliduser();
-  }, []);
-
   const logoutuser = async () => {
-    const res2 = await fetch("/logout", {
+    const res2 = await fetch(`${BASE_URL}/logout`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -84,13 +82,12 @@ const Navbaar = () => {
     });
 
     const data2 = await res2.json();
-    if (!res2.status === 201) {
-      const error = new Error(res2.error);
-      throw error;
+    if (res2.status !== 201) {
+      toast.error("Logout failed!", { position: "top-center" });
     } else {
       setAccount(false);
       setOpen(false);
-      toast.success("User Logout 😃!", {
+      toast.success("User Logged Out 😃!", {
         position: "top-center",
       });
       navigate("/");
@@ -137,6 +134,7 @@ const Navbaar = () => {
             <div className="search_icon">
               <i className="fas fa-search" id="search"></i>
             </div>
+
             {text && (
               <List className="extrasearch" hidden={liopen}>
                 {products
@@ -161,29 +159,23 @@ const Navbaar = () => {
         </div>
 
         <div className="right">
-          <div className="nav_btn">
-            <NavLink to="/login">Signin</NavLink>
-          </div>
-
-          {account ? (
-            <NavLink to="/buynow">
-              <div className="cart_btn">
-                
-                  <i className="fas fa-shopping-cart" id="icon"></i>
-                
-                <p>Cart</p>
-              </div>
-            </NavLink>
-          ) : (
-            <NavLink to="/login">
-              <div className="cart_btn">
-                <Badge badgeContent={0} color="primary">
-                <i className="fa-solid fa-cart-shopping"></i>
-                </Badge>
-                <p>Cart</p>
-              </div>
-            </NavLink>
+          {!account && (
+            <div className="nav_btn">
+              <NavLink to="/login">Signin</NavLink>
+            </div>
           )}
+
+          <NavLink to={account ? "/buynow" : "/login"}>
+            <div className="cart_btn">
+              <Badge
+                badgeContent={account?.carts?.length || 0}
+                color="primary"
+              >
+                <i className="fa-solid fa-cart-shopping"></i>
+              </Badge>
+              <p>Cart</p>
+            </div>
+          </NavLink>
 
           {account && account.fname ? (
             <Avatar
