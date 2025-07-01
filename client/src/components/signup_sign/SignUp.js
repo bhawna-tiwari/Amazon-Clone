@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./signup.css"; // Make sure this CSS file exists
+import BASE_URL from "../../utils/BASE_URL";
+
 
 const SignUp = () => {
   const [udata, setUdata] = useState({
@@ -35,7 +37,7 @@ const SignUp = () => {
     }
 
     try {
-      const res = await fetch("https://your-backend-url.onrender.com/register", {
+      const res = await fetch(`${BASE_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
