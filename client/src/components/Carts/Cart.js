@@ -3,7 +3,7 @@ import { Divider } from "@mui/material";
 import "./cart.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 
 // ✅ Change this to your deployed backend URL
 const BACKEND_URL = "https://amazon-clone-project-u1p8.onrender.com";
@@ -24,8 +24,9 @@ const Cart = () => {
       });
 
       const data = await res.json();
+      console.log("Status:", res.status, "Data:", data);
 
-      if (res.status !== 201) {
+      if (!res.ok) {
         console.log("No data available");
       } else {
         setIndedata(data);
@@ -71,7 +72,12 @@ const Cart = () => {
           <div className="left_cart">
             <img src={inddata?.detailUrl} alt="cart_img" />
             <div className="cart_btn">
-              <button className="cart_btn1" onClick={() => addtocart(inddata.id)}>Add to Cart</button>
+              <button
+                className="cart_btn1"
+                onClick={() => addtocart(inddata.id)}
+              >
+                Add to Cart
+              </button>
               <button className="cart_btn2">Buy Now</button>
             </div>
           </div>
@@ -85,12 +91,16 @@ const Cart = () => {
             </p>
             <p>
               Deal of the Day :
-              <span style={{ color: "#B12704" }}> ₹{inddata?.price?.cost}.00</span>
+              <span style={{ color: "#B12704" }}>
+                {" "}
+                ₹{inddata?.price?.cost}.00
+              </span>
             </p>
             <p>
               You save :
               <span style={{ color: "#B12704" }}>
-                ₹{(inddata?.price?.mrp || 0) - (inddata?.price?.cost || 0)} ({inddata?.price?.discount})
+                ₹{(inddata?.price?.mrp || 0) - (inddata?.price?.cost || 0)} (
+                {inddata?.price?.discount})
               </span>
             </p>
 
@@ -101,17 +111,30 @@ const Cart = () => {
               </h5>
               <h4>
                 Free Delivery :
-                <span style={{ color: "#111", fontWeight: 600 }}> jan-8-25</span> Details
+                <span style={{ color: "#111", fontWeight: 600 }}>
+                  {" "}
+                  jan-8-25
+                </span>{" "}
+                Details
               </h4>
               <p>
                 Fastest Delivery :
-                <span style={{ color: "#111", fontWeight: 600 }}>Tomorrow 11AM</span>
+                <span style={{ color: "#111", fontWeight: 600 }}>
+                  Tomorrow 11AM
+                </span>
               </p>
             </div>
 
             <p className="description">
               About the Item :
-              <span style={{ color: "#565959", fontSize: 14, fontWeight: 500, letterSpacing: "0.4px" }}>
+              <span
+                style={{
+                  color: "#565959",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  letterSpacing: "0.4px",
+                }}
+              >
                 {inddata?.description}
               </span>
             </p>
