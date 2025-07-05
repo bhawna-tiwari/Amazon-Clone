@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
     res.cookie("AmazonWeb", token, {
       httpOnly: true,
       sameSite: "Lax",
-      secure: false,
+        secure: true,
       expires: new Date(Date.now() + 900000),
     });
 
