@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const secretKey = process.env.KEY;
 
 const userSchema = new mongoose.Schema({
@@ -16,7 +17,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         validate(value) {
             if (!validator.isEmail(value)) {
-                throw new Error("not valid email address");
+                throw new Error("Not a valid email address");
             }
         }
     },
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        maxlength : 10
+        maxlength: 10
     },
     password: {
         type: String,
@@ -36,53 +37,48 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 6
     },
-    tokens:[
+    tokens: [
         {
-            token:{
-                type:String,
-                required:true
+            token: {
+                type: String,
+                required: true
             }
         }
     ],
-    carts:Array
+    carts: Array
 });
 
-
-// password hasing 
+// ✅ Password hashing (only password, not cpassword)
 userSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 12);
-        this.cpassword = await bcrypt.hash(this.cpassword, 12);
     }
     next();
 });
 
-
-//token
-userSchema.methods.generatAuthtoken = async function(){
+// ✅ Token generator
+userSchema.methods.generateAuthToken = async function () {
     try {
-        let token = jwt.sign({ _id:this._id},secretKey);
-        this.tokens= this.tokens.concat({token:token});
+        let token = jwt.sign({ _id: this._id }, secretKey);
+        this.tokens = this.tokens.concat({ token: token });
         await this.save();
         return token;
-
     } catch (error) {
-        console.log(error);
+        console.log("Token Error:", error);
     }
-}
+};
 
-
-//add to cart data
-userSchema.methods.addcartdata = async function(cart){
+// ✅ Add to cart
+userSchema.methods.addCartData = async function (cart) {
     try {
         this.carts = this.carts.concat(cart);
         await this.save();
         return this.carts;
     } catch (error) {
-        console.log(error + "bhai cart add time aai error");
+        console.log("Add to cart error:", error);
     }
-}
+};
 
-const USER = new mongoose.model("USER", userSchema);
+const USER = mongoose.model("USER", userSchema);
 
 module.exports = USER;
