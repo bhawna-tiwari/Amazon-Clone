@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const secretKey = process.env.KEY;
@@ -48,13 +47,7 @@ const userSchema = new mongoose.Schema({
     carts: Array
 });
 
-// ✅ Password hashing (only password, not cpassword)
-userSchema.pre("save", async function (next) {
-    if (this.isModified("password")) {
-        this.password = await bcrypt.hash(this.password, 12);
-    }
-    next();
-});
+// ❌ Removed password hashing middleware (bcryptjs)
 
 // ✅ Token generator
 userSchema.methods.generateAuthToken = async function () {
@@ -82,3 +75,4 @@ userSchema.methods.addCartData = async function (cart) {
 const USER = mongoose.model("USER", userSchema);
 
 module.exports = USER;
+
