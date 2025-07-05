@@ -60,11 +60,11 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.generateAuthToken = async function () {
     try {
         let token = jwt.sign({ _id: this._id }, secretKey);
-        this.tokens = this.tokens.concat({ token: token });
+        this.tokens = this.tokens.concat({ token });
         await this.save();
         return token;
     } catch (error) {
-        console.log("Token Error:", error);
+        console.log(error);
     }
 };
 
