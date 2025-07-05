@@ -56,7 +56,7 @@ router.post("/register", async (req, res) => {
 
 // LOGIN user
 
-  const bcrypt = require("bcrypt");
+  const bcrypt = require("bcryptjs");
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
