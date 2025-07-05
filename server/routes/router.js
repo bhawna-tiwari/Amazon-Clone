@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const products = require("../models/productsSchema");
 const USER = require("../models/userSchema");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const authenticate = require("../middleware/authenticate");
 
 // GET all products
@@ -55,8 +55,6 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN user
-
-  const bcrypt = require("bcryptjs");
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
