@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const products = require("../models/productsSchema");
 const USER = require("../models/userSchema");
-const bcrypt = require("bcryptjs");
+// ❌ Removed: const bcrypt = require("bcryptjs");
 const authenticate = require("../middleware/authenticate");
 
 // GET all products
@@ -55,7 +55,6 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN user
-
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -67,8 +66,9 @@ router.post("/login", async (req, res) => {
 
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+    // ❌ Removed bcrypt.compare — doing plain comparison
+    if (password !== user.password)
+      return res.status(400).json({ error: "Invalid credentials" });
 
     const token = await user.generateAuthToken();
 
