@@ -55,31 +55,36 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN user
+
+  const bcrypt = require("bcrypt");
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Fill in all the details" });
-  }
+  if (!email || !password)
+    return res.status(400).json({ error: "Please fill all fields" });
 
   try {
-    const userLogin = await USER.findOne({ email });
+    const user = await USER.findOne({ email });
 
-    if (userLogin && password === userLogin.password) {
-      const token = await userLogin.generatAuthtoken();
-      res.cookie("AmazonWeb", token, {
-        expires: new Date(Date.now() + 900000),
-        httpOnly: true,
-        sameSite: "Lax",
-        secure: false,
-      });
-      return res.status(201).json({ userLogin });
-    } else {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+    const token = await user.generateAuthToken();
+
+    res.cookie("AmazonWeb", token, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: false,
+      expires: new Date(Date.now() + 900000),
+    });
+
+    res.status(201).json({ user });
   } catch (error) {
-    console.error("Login error:", error.message);
-    return res.status(500).json({ error: "Server error" });
+    console.log("Login error:", error.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
